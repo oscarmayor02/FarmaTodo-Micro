@@ -1,0 +1,22 @@
+server:
+  port: 8084
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/products}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASS:root}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc.time_zone: UTC
+
+app:
+  security:
+    api-key: ${API_KEY_PRODUCTS:dev-secret}
+
+product:
+  min-stock-visible: ${MIN_STOCK_VISIBLE:1}

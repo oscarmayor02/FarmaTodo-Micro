@@ -1,0 +1,27 @@
+server:
+  port: 8087
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/cart
+    username: postgres
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
+app:
+  security:
+    api-key: ${API_KEY_CART:dev-secret}
+
+clients:
+  product:
+    base-url: ${PRODUCT_BASE_URL:http://localhost:8084}
+    api-key: ${PRODUCT_API_KEY:dev-secret}
+    validate: ${CART_VALIDATE_PRODUCT:true} # si true: valida existencia del producto vía product-service
+
+management:
+  endpoints.web.exposure.include: health,info

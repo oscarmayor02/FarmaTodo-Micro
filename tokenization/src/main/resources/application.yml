@@ -1,0 +1,23 @@
+server:
+  port: 8081                               # Exponemos el micro en el puerto 8081
+
+spring:
+  datasource:                               # Config JDBC hacia Postgres (local/compose)
+    url: jdbc:postgresql://localhost:5432/tokenization
+    username: postgres
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update                      # Auto-genera/actualiza el esquema (para el reto es práctico)
+    properties:
+      hibernate:
+        format_sql: true                    # SQL bonito en logs
+
+app:
+  security:
+    api-key: ${API_KEY_TOKENIZATION:dev-secret}    # API Key configurable por env
+  token:
+    rejection-probability: ${TOKEN_REJECTION_PROB:0.15}  # Probabilidad de rechazo (0.0..1.0)
+    hmac-secret: ${TOKEN_HMAC_SECRET:change-me}
+  crypto:
+    key-hex: ${CRYPTO_KEY_HEX:00112233445566778899AABBCCDDEEFF00112233445566778899AABBCCDDEEFF} # Clave AES-256 en hex

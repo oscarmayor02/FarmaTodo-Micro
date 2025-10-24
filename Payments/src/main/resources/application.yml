@@ -1,0 +1,46 @@
+server:
+  port: 8083
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/payments       # JDBC local o compose
+    username: postgres                             # Usuario de la BD
+    password: root                              # Password BD
+  jpa:
+    hibernate:
+      ddl-auto: update                                    # Auto schema para la demo
+    properties:
+      hibernate:
+        format_sql: true                                  # SQL bonito en logs
+
+app:
+  security:
+    api-key: ${API_KEY_PAYMENTS:dev-secret}               # API Key de entrada
+
+tokenization:
+  base-url: ${TOKENIZATION_BASE_URL:http://localhost:8081}# URL al micro de tokenización
+  api-key:  ${TOKENIZATION_API_KEY:dev-secret}            # API Key hacia tokenization
+
+payment:
+  rejection-prob: ${PAYMENT_REJECTION_PROB:0.20}          # Probabilidad de rechazo [0..1]
+  max-retries:    ${PAYMENT_MAX_RETRIES:2}                # Reintentos ante rechazo
+  backoff-ms:     ${PAYMENT_BACKOFF_MS:200}               # Espera entre reintentos
+
+# Configuración del publisher asíncrono (Outbox -> REST Notifications)
+notifications:
+  base-url: ${NOTIFICATIONS_BASE_URL:http://localhost:8086}  # URL del micro notifications
+  api-key:  ${NOTIFICATIONS_API_KEY:dev-secret}              # API Key para llamar notifications
+  publisher:
+    enabled: true                                            # Activa el scheduler
+    fixed-delay-ms: 2000                                     # Corre cada 2 segundos
+    batch-size: 50                                           # Registros por ciclo
+    max-attempts: 5                                          # Máximo reintentos por outbox
+    initial-backoff-ms: 1000                                 # Backoff inicial (ms)
+    backoff-multiplier: 2.0                                  # Backoff exponencial
+
+audit:
+  base-url: ${AUDIT_BASE_URL:http://localhost:8088}
+  api-key:  ${AUDIT_API_KEY:dev-secret}
+# Trazabilidad: nombre de header para Transaction-Id
+tracing:
+  header: ${TRACING_HEADER:X-TX-ID}

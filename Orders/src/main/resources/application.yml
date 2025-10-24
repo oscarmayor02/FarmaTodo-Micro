@@ -1,0 +1,33 @@
+server:
+  port: 8085
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/orders}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASS:root}
+  jpa:
+    hibernate:
+      ddl-auto: update   # prod: validate
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc.time_zone: UTC
+
+app:
+  security:
+    api-key: ${API_KEY_ORDERS:dev-secret}
+
+clients:
+  customer:
+    base-url: ${CUSTOMER_URL:http://localhost:8082}
+    api-key: ${API_KEY_CUSTOMERS:dev-secret}
+  product:
+    base-url: ${PRODUCT_URL:http://localhost:8084}
+    api-key: ${API_KEY_PRODUCTS:dev-secret}
+  payments:
+    base-url: ${PAYMENTS_URL:http://localhost:8083}
+    api-key: ${API_KEY_PAYMENTS:dev-secret}
+  audit:
+    base-url: ${AUDIT_BASE_URL:http://localhost:8088}
+    api-key:  ${AUDIT_API_KEY:dev-secret}
