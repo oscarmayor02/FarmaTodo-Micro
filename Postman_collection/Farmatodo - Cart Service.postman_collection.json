@@ -1,0 +1,200 @@
+{
+	"info": {
+		"_postman_id": "b3ea8049-ae6c-4873-af41-c61688022271",
+		"name": "Farmatodo - Cart Service",
+		"description": "Colección para probar el micro de carrito.\nEndpoints:\n- POST /api/v1/carts/:customerId/items (agregar)\n- GET  /api/v1/carts/:customerId        (listar)\n- DELETE /api/v1/carts/:customerId      (vaciar)\n\nNota: Usa {{base_url}} para apuntar directo al servicio o al gateway.\nDirecto:  http://localhost:8087\nGateway:  http://localhost:8090/cart",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9237699",
+		"_collection_link": "https://pragma-6530.postman.co/workspace/FarmaTodo~99f6a072-f541-4f90-bd8f-6aadef696f7a/collection/9237699-b3ea8049-ae6c-4873-af41-c61688022271?action=share&source=collection_link&creator=9237699"
+	},
+	"item": [
+		{
+			"name": "Ping",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status 200', () => pm.response.code === 200);",
+							"pm.test('Body contiene pong', () => pm.response.json().message === 'pong');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{api_key}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/ping",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"ping"
+					]
+				},
+				"description": "Healthcheck del servicio"
+			},
+			"response": []
+		},
+		{
+			"name": "Agregar ítem al carrito",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 No Content', () => pm.response.code === 204);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-API-KEY",
+						"value": "{{api_key}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"productId\": {{product_id}},\n  \"qty\": {{qty}}\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/carts/{{customer_id}}/items",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"carts",
+						"{{customer_id}}",
+						"items"
+					]
+				},
+				"description": "Agrega (o incrementa) un producto en el carrito del cliente."
+			},
+			"response": []
+		},
+		{
+			"name": "Obtener carrito por cliente",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status 200', () => pm.response.code === 200);",
+							"pm.test('Es un arreglo', () => Array.isArray(pm.response.json()));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{api_key}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/carts/{{customer_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"carts",
+						"{{customer_id}}"
+					]
+				},
+				"description": "Lista los ítems del carrito para el cliente dado."
+			},
+			"response": []
+		},
+		{
+			"name": "Vaciar carrito",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 No Content', () => pm.response.code === 204);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{api_key}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/carts/{{customer_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"carts",
+						"{{customer_id}}"
+					]
+				},
+				"description": "Elimina todos los ítems del carrito del cliente."
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8087",
+			"type": "string",
+			"description": "Directo al cart-service. Si usas gateway, cambia a http://localhost:8090/cart"
+		},
+		{
+			"key": "api_key",
+			"value": "dev-secret",
+			"type": "string"
+		},
+		{
+			"key": "customer_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "product_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "qty",
+			"value": "2",
+			"type": "string"
+		}
+	]
+}

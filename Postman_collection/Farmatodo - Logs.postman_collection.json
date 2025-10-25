@@ -1,0 +1,54 @@
+{
+	"info": {
+		"_postman_id": "9a430e9c-aa73-4e9b-820f-c7e3f53e65b7",
+		"name": "Farmatodo - Logs",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9237699",
+		"_collection_link": "https://pragma-6530.postman.co/workspace/FarmaTodo~99f6a072-f541-4f90-bd8f-6aadef696f7a/collection/9237699-9a430e9c-aa73-4e9b-820f-c7e3f53e65b7?action=share&source=collection_link&creator=9237699"
+	},
+	"item": [
+		{
+			"name": "log",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "dev-secret"
+					},
+					{
+						"key": "X-TX-ID",
+						"value": "test-tx"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"service\":\"payments\",\n    \"eventType\":\"PING\",\n    \"orderId\":\"ORD-0\",\n    \"entityId\":null,\n    \"payloadJson\":\"{}\"\n  }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8088/api/v1/logs",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"v1",
+						"logs"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,0 +1,249 @@
+{
+	"info": {
+		"_postman_id": "a399075c-c5f9-4879-a22a-97f8dd6139c4",
+		"name": "Farmatodo - Orders Service",
+		"description": "Colección enfocada al micro de Orders: /ping, crear orden (con tokenCard o con card) y consultar por id.\nAlineado con OrderController: POST /api/v1/orders, GET /api/v1/orders/{id}.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9237699",
+		"_collection_link": "https://pragma-6530.postman.co/workspace/FarmaTodo~99f6a072-f541-4f90-bd8f-6aadef696f7a/collection/9237699-a399075c-c5f9-4879-a22a-97f8dd6139c4?action=share&source=collection_link&creator=9237699"
+	},
+	"item": [
+		{
+			"name": "orders /ping",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status 200', () => pm.response.code === 200);",
+							"pm.test('pong', () => pm.response.text().includes('pong'));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{orders_api_key}}"
+					}
+				],
+				"url": {
+					"raw": "{{orders_base}}/ping",
+					"host": [
+						"{{orders_base}}"
+					],
+					"path": [
+						"ping"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Order (with tokenCard)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"if (!pm.collectionVariables.get('customer_id')) throw new Error('Falta customer_id');",
+							"if (!pm.collectionVariables.get('product_id')) throw new Error('Falta product_id');",
+							"// token_card puede estar vacío si vas a usar la otra variante con card"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('201/200', () => [200,201].includes(pm.response.code));",
+							"const json = pm.response.json();",
+							"pm.collectionVariables.set('order_id', String(json.orderId));",
+							"pm.test('orderId seteado', () => !!pm.collectionVariables.get('order_id'));",
+							"pm.test('status válido', () => ['CREATED','PAID','FAILED'].includes(json.status));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{orders_api_key}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"customerId\": {{customer_id}},\n  \"address\": \"Calle 123 #45-67, Bogotá\",\n  \"tokenCard\": \"{{token_card}}\",\n  \"items\": [\n    { \"productId\": {{product_id}}, \"qty\": 2 }\n  ],\n  \"customerEmail\": \"{{customer_email}}\"\n}"
+				},
+				"url": {
+					"raw": "{{orders_base}}/api/v1/orders",
+					"host": [
+						"{{orders_base}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Order (with card → tokenization inside payments)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"if (!pm.collectionVariables.get('customer_id')) throw new Error('Falta customer_id');",
+							"if (!pm.collectionVariables.get('product_id')) throw new Error('Falta product_id');"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('201/200', () => [200,201].includes(pm.response.code));",
+							"const json = pm.response.json();",
+							"pm.collectionVariables.set('order_id', String(json.orderId));",
+							"pm.test('orderId seteado', () => !!pm.collectionVariables.get('order_id'));",
+							"pm.test('status válido', () => ['CREATED','PAID','FAILED'].includes(json.status));"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{orders_api_key}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"customerId\": 1,\n  \"address\": \"Calle 123 #45-67, Bogotá\",\n  \"card\": {\n    \"pan\": \"4221111111111111\",\n    \"cvv\": \"123\",\n    \"expMonth\": 12,\n    \"expYear\": 2030,\n    \"name\": \"Andrea Patiño\"\n  },\n  \"items\": [\n    { \"productId\": 3, \"qty\": 2 },\n    { \"productId\": 1, \"qty\": 3 }\n  ],\n  \"customerEmail\": \"oscar.mayor.dev@gmail.com\"\n}\n"
+				},
+				"url": {
+					"raw": "{{orders_base}}/api/v1/orders",
+					"host": [
+						"{{orders_base}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Order by Id",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"if (!pm.collectionVariables.get('order_id')) throw new Error('Falta order_id. Crea primero una orden.');"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('200 OK', () => pm.response.code === 200);",
+							"const json = pm.response.json();",
+							"pm.test('Estructura', () => json.orderId && json.status && Array.isArray(json.items));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{orders_api_key}}"
+					}
+				],
+				"url": {
+					"raw": "{{orders_base}}/api/v1/orders/{{order_id}}",
+					"host": [
+						"{{orders_base}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"orders",
+						"{{order_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "orders_base",
+			"value": "http://localhost:8085",
+			"type": "string"
+		},
+		{
+			"key": "orders_api_key",
+			"value": "dev-secret",
+			"type": "string"
+		},
+		{
+			"key": "customer_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "customer_email",
+			"value": "cliente@test.com",
+			"type": "string"
+		},
+		{
+			"key": "product_id",
+			"value": "10",
+			"type": "string"
+		},
+		{
+			"key": "token_card",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "order_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

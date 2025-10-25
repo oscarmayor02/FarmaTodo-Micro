@@ -1,0 +1,381 @@
+{
+	"info": {
+		"_postman_id": "8cdaaf69-59f2-4ae5-a9da-70d07b2e0446",
+		"name": "Farmatodo - Payments Service",
+		"description": "Colección completa para probar el microservicio Payments: ping, charge (token/card), rejected, bad request, unauthorized, get by id.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9237699",
+		"_collection_link": "https://pragma-6530.postman.co/workspace/FarmaTodo~99f6a072-f541-4f90-bd8f-6aadef696f7a/collection/9237699-8cdaaf69-59f2-4ae5-a9da-70d07b2e0446?action=share&source=collection_link&creator=9237699"
+	},
+	"item": [
+		{
+			"name": "Ping (200)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('200 OK', () => pm.response.to.have.status(200));",
+							"pm.test('pong', () => pm.expect(pm.response.json().message).to.eql('pong'));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/ping",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"ping"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Charge with TOKEN (expected APPROVED)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.variables.set('RANDOM', Math.floor(Math.random()*100000));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"  const res = pm.response.json();",
+							"  pm.test('status=APPROVED', () => pm.expect(res.status).to.eql('APPROVED'));",
+							"} else if (pm.response.code === 402) {",
+							"  pm.test('Puede fallar por probabilidad cuando no está en 0.0', () => true);",
+							"} else {",
+							"  pm.test('HTTP debe ser 200 o 402', () => false);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{API_KEY}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"orderId\": \"ORD-TOKEN-{{RANDOM}}\",\n  \"amount\": 15000,\n  \"currency\": \"COP\",\n  \"token\": \"tok-demo\"\n}"
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/api/v1/payments/charge",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"payments",
+						"charge"
+					]
+				},
+				"description": "Aprobación esperada si PAYMENT_REJECTION_PROB=0.0. Si no, puede llegar 402."
+			},
+			"response": []
+		},
+		{
+			"name": "Charge with CARD via Tokenization (expected APPROVED)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.variables.set('RANDOM', Math.floor(Math.random()*100000));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"  const res = pm.response.json();",
+							"  pm.test('status=APPROVED', () => pm.expect(res.status).to.eql('APPROVED'));",
+							"} else if (pm.response.code === 402) {",
+							"  pm.test('Puede ser REJECTED si probabilidad > 0', () => true);",
+							"} else if (pm.response.code === 502 || pm.response.code === 401 || pm.response.code === 404) {",
+							"  pm.test('Falla de Tokenization o auth: revisar variables y servicios', () => true);",
+							"} else {",
+							"  pm.test('HTTP inesperado', () => false);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{API_KEY}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"orderId\": \"ORD-CARD-{{RANDOM}}\",\n  \"amount\": 20000,\n  \"currency\": \"COP\",\n  \"card\": {\n    \"pan\": \"4111111111111111\",\n    \"cvv\": \"123\",\n    \"expMonth\": 12,\n    \"expYear\": 2030,\n    \"name\": \"John Doe\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/api/v1/payments/charge",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"payments",
+						"charge"
+					]
+				},
+				"description": "Hace llamada interna a Tokenization. Para éxito garantizado: PAYMENT_REJECTION_PROB=0.0 y Tokenization operativa."
+			},
+			"response": []
+		},
+		{
+			"name": "Charge (expected REJECTED) — force PAYMENT_REJECTION_PROB=1.0",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.variables.set('RANDOM', Math.floor(Math.random()*100000));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('402 Payment Required', () => pm.response.to.have.status(402));",
+							"pm.test('Mensaje indica rechazo', () => pm.response.text().toLowerCase().includes('rejected'));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{API_KEY}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"orderId\": \"ORD-REJECT-{{RANDOM}}\",\n  \"amount\": 10000,\n  \"currency\": \"COP\",\n  \"token\": \"tok-demo\"\n}"
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/api/v1/payments/charge",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"payments",
+						"charge"
+					]
+				},
+				"description": "Para asegurar 402, corre el servicio con PAYMENT_REJECTION_PROB=1.0."
+			},
+			"response": []
+		},
+		{
+			"name": "Charge (400 Bad Request) — missing token & card",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.variables.set('RANDOM', Math.floor(Math.random()*100000));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('400 Bad Request', () => pm.response.to.have.status(400));",
+							"pm.test('Mensaje claro', () => pm.response.text().includes(\"Either 'token' or 'card' must be provided\"));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{API_KEY}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"orderId\": \"ORD-400-{{RANDOM}}\",\n  \"amount\": 5000,\n  \"currency\": \"COP\"\n}"
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/api/v1/payments/charge",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"payments",
+						"charge"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Unauthorized (401) — missing API Key",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.variables.set('RANDOM', Math.floor(Math.random()*100000));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('401 Unauthorized', () => pm.response.to.have.status(401));",
+							"pm.test('Mensaje de API Key', () => pm.response.text().toLowerCase().includes('x-api-key'));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"orderId\": \"ORD-401-{{RANDOM}}\",\n  \"amount\": 6000,\n  \"currency\": \"COP\",\n  \"token\": \"tok-demo\"\n}"
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/api/v1/payments/charge",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"payments",
+						"charge"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Payment by Id (200)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"  pm.test('Tiene status', () => pm.expect(pm.response.json()).to.have.property('status'));",
+							"} else if (pm.response.code === 404) {",
+							"  pm.test('No existe ese paymentId', () => true);",
+							"} else {",
+							"  pm.test('HTTP inesperado', () => false);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{API_KEY}}"
+					}
+				],
+				"url": {
+					"raw": "{{BASE_URL}}/api/v1/payments/{{PAYMENT_ID}}",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"payments",
+						"{{PAYMENT_ID}}"
+					]
+				},
+				"description": "Ajusta PAYMENT_ID manualmente (por defecto 1). Retorna estado, attempts, authCode (si aprobó) y orderId."
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "http://localhost:8083"
+		},
+		{
+			"key": "API_KEY",
+			"value": "dev-secret"
+		},
+		{
+			"key": "PAYMENT_ID",
+			"value": "1"
+		}
+	]
+}

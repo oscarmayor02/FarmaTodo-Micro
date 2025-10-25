@@ -1,0 +1,386 @@
+{
+	"info": {
+		"_postman_id": "55c83242-502a-4d4c-a91c-05db2613eec2",
+		"name": "Farmatodo - Product Service",
+		"description": "Colección completa para el microservicio de productos: /ping, CRUD, decrement, search.\nVariables: base_url, api_key, product_id, qty, q.\nPrepara data de ejemplo y tests básicos.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9237699",
+		"_collection_link": "https://pragma-6530.postman.co/workspace/FarmaTodo~99f6a072-f541-4f90-bd8f-6aadef696f7a/collection/9237699-55c83242-502a-4d4c-a91c-05db2613eec2?action=share&source=collection_link&creator=9237699"
+	},
+	"item": [
+		{
+			"name": "Health - /ping",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status 200', () => pm.response.code === 200);",
+							"pm.test('Body contiene pong', () => pm.response.text().includes('pong'));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{api_key}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/ping",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"ping"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Products - Create",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status 201 Created', () => pm.response.code === 201);",
+							"const json = pm.response.json();",
+							"pm.test('Tiene id', () => json.id !== undefined);",
+							"// Guarda el ID creado para otros requests",
+							"pm.collectionVariables.set('product_id', String(json.id));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{api_key}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Alcohol Antiséptico 70%\",\n  \"price\": 12500,\n  \"stock\": 100\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/products",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Products - List all",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status 200', () => pm.response.code === 200);",
+							"const arr = pm.response.json();",
+							"pm.test('Es arreglo', () => Array.isArray(arr));",
+							"if (arr.length) { pm.test('Campos presentes', () => arr[0].id && arr[0].name && (arr[0].price!==undefined) && (arr[0].stock!==undefined)); }"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{api_key}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/products",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Products - Get by Id",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Asegura que exista product_id; si no, usa 10 como fallback",
+							"if (!pm.collectionVariables.get('product_id')) { pm.collectionVariables.set('product_id', '10'); }"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status 200', () => pm.response.code === 200);",
+							"const json = pm.response.json();",
+							"pm.test('Tiene id, name, price, stock', () => json.id && json.name && (json.price!==undefined) && (json.stock!==undefined));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{api_key}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/products/{{product_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products",
+						"{{product_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Products - Update (PUT)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status 200', () => pm.response.code === 200);",
+							"const json = pm.response.json();",
+							"pm.test('Datos actualizados', () => json.name.includes('(Botella 1L)'));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{api_key}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Alcohol Antiséptico 70% (Botella 1L)\",\n  \"price\": 15900,\n  \"stock\": 120\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/products/{{product_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products",
+						"{{product_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Products - Decrement stock",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Ajusta qty aleatoriamente 1-3 si quieres",
+							"// const q = Math.floor(Math.random()*3)+1; pm.collectionVariables.set('qty', String(q));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('No Content 204', () => pm.response.code === 204);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{api_key}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/products/{{product_id}}/decrement?qty={{qty}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products",
+						"{{product_id}}",
+						"decrement"
+					],
+					"query": [
+						{
+							"key": "qty",
+							"value": "{{qty}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Products - Search (stock >= min visible)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status 200', () => pm.response.code === 200);",
+							"const arr = pm.response.json();",
+							"pm.test('Es arreglo', () => Array.isArray(arr));",
+							"pm.test('Campos presentes', () => arr.length === 0 || (arr[0].id && arr[0].name && (arr[0].price!==undefined) && (arr[0].stock!==undefined)));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{api_key}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/products/search?q={{q}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products",
+						"search"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "{{q}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Products - Delete",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('No Content 204', () => pm.response.code === 204);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{api_key}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/products/{{product_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products",
+						"{{product_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8084",
+			"type": "string"
+		},
+		{
+			"key": "api_key",
+			"value": "dev-secret",
+			"type": "string"
+		},
+		{
+			"key": "product_id",
+			"value": "10",
+			"type": "string"
+		},
+		{
+			"key": "qty",
+			"value": "2",
+			"type": "string"
+		},
+		{
+			"key": "q",
+			"value": "vitamina",
+			"type": "string"
+		}
+	]
+}

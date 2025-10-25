@@ -1,0 +1,181 @@
+{
+	"info": {
+		"_postman_id": "3aa36e66-42df-48c2-887d-8fd172a55107",
+		"name": "Farmatodo - Tokenization Service",
+		"description": "Colección para pruebas del microservicio Tokenization (reto técnico Farmatodo). Incluye los casos: ping, tokenización exitosa, tokenización rechazada.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9237699",
+		"_collection_link": "https://pragma-6530.postman.co/workspace/FarmaTodo~99f6a072-f541-4f90-bd8f-6aadef696f7a/collection/9237699-3aa36e66-42df-48c2-887d-8fd172a55107?action=share&source=collection_link&creator=9237699"
+	},
+	"item": [
+		{
+			"name": "Ping - Healthcheck",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/ping",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"ping"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Tokenize - Success (ISSUED)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Debe responder con 200 OK', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const res = pm.response.json();",
+							"pm.test('Debe tener status ISSUED', function () {",
+							"    pm.expect(res.status).to.eql('ISSUED');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{API_KEY}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"pan\": \"4221111111111111\",\n  \"cvv\": \"123\",\n  \"expMonth\": 12,\n  \"expYear\": 2030,\n  \"name\": \"Andrea Patiño\"\n}"
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/api/v1/tokenize",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"tokenize"
+					]
+				},
+				"description": "Simula tokenización exitosa. Ajusta TOKEN_REJECTION_PROB a 0.0 en entorno o docker para garantizar éxito."
+			},
+			"response": [
+				{
+					"name": "Ejemplo éxito",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"_postman_previewlanguage": "json",
+					"header": [],
+					"cookie": [],
+					"body": "{\n  \"token\": \"3d4ebf98-8d7f-45a9-a186-df19ab8ab157\",\n  \"last4\": \"1111\",\n  \"brand\": \"VISA\",\n  \"status\": \"ISSUED\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Tokenize - Rejected (REJECTED)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Debe responder con 402 Payment Required', function () {",
+							"    pm.response.to.have.status(402);",
+							"});",
+							"",
+							"const res = pm.response.json();",
+							"pm.test('Debe tener status REJECTED', function () {",
+							"    pm.expect(res.status).to.eql('REJECTED');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{API_KEY}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"pan\": \"4111111111111111\",\n  \"cvv\": \"123\",\n  \"expMonth\": 12,\n  \"expYear\": 2030,\n  \"name\": \"John Doe\"\n}"
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/api/v1/tokenize",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"tokenize"
+					]
+				},
+				"description": "Simula tokenización rechazada. Ajusta TOKEN_REJECTION_PROB a 1.0 para garantizar rechazo."
+			},
+			"response": [
+				{
+					"name": "Ejemplo rechazo",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"_postman_previewlanguage": "json",
+					"header": [],
+					"cookie": [],
+					"body": "{\n  \"token\": null,\n  \"last4\": \"1111\",\n  \"brand\": \"VISA\",\n  \"status\": \"REJECTED\"\n}"
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "http://localhost:8081"
+		},
+		{
+			"key": "API_KEY",
+			"value": "dev-secret"
+		},
+		{
+			"key": "TOKEN_REJECTION_PROB",
+			"value": "0.15"
+		}
+	]
+}
