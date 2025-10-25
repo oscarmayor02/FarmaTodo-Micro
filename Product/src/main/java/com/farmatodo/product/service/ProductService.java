@@ -1,5 +1,3 @@
-// com.farmatodo.product.service.ProductService
-
 package com.farmatodo.product.service;
 
 import com.farmatodo.product.domain.Product;
@@ -58,8 +56,6 @@ public class ProductService {
         p.setName(req.name());
         p.setPrice(req.price());
         p.setStock(req.stock());
-        // (opcional) validar duplicado si cambió nombre
-        // if (!p.getName().equalsIgnoreCase(req.name()) && repo.existsByNameIgnoreCase(req.name())) throw conflict("Product name already exists");
         return map(repo.save(p));
     }
 
@@ -70,7 +66,6 @@ public class ProductService {
         repo.deleteById(id);
     }
 
-    /** -------- NEGOCIO EXISTENTE -------- */
     @Transactional
     public void decrement(Long id, int qty){
         var p = repo.findById(id).orElseThrow(() -> notFound("Product not found"));

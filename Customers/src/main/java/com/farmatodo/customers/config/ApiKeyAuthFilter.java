@@ -18,7 +18,7 @@ import java.util.Set;
 @Component
 public class ApiKeyAuthFilter extends OncePerRequestFilter {
 
-    @Value("${app.security.api-key}")           // API Key configurada
+    @Value("${app.security.api-key}")
     private String configuredKey;
 
     // Rutas públicas (ping + swagger)

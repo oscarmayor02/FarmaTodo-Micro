@@ -6,7 +6,6 @@ import java.util.List;
 public record CreateOrderRequest(
         @NotNull Long customerId,
         @NotBlank String address,
-        // uno de los dos debe venir:
         String tokenCard,
         CardData card,
         @Size(min=1) List<Item> items,

@@ -20,28 +20,27 @@ public class CardToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;// Identificador interno
+    private Long id;
 
-    @Column(nullable = false, unique = true) // Columna NO NULL y única
-    private String token;// Token público (UUID)
+    @Column(nullable = false, unique = true)
+    private String token;
 
-    @Column(nullable = false)// NO NULL
-    private String last4;// Últimos 4 dígitos de la tarjeta
+    @Column(nullable = false)
+    private String last4;
 
     private String brand;// Marca (VISA/MASTERCARD/AMEX/UNKNOWN)
 
-    @Column(nullable = false)// NO NULL
-    private Instant createdAt;// Fecha de creación
+    @Column(nullable = false)
+    private Instant createdAt;
 
     @Column(nullable = false)// NO NULL
-    @Enumerated(EnumType.STRING)// Enum como string
-    private TokenStatus status;// Estado (ISSUED/REJECTED)
+    @Enumerated(EnumType.STRING)  private TokenStatus status;// Estado (ISSUED/REJECTED)
 
     @Column(nullable = false, columnDefinition = "bytea")
    @JdbcTypeCode(SqlTypes.BINARY)
-   private byte[] encryptedPayload; // PAN|EXP|NAME cifrados (bytea, no OID)
+   private byte[] encryptedPayload; // PAN|EXP|NAME cifrados
 
-    private String payloadIvHex; // IV usado en AES-GCM (hex)
+    private String payloadIvHex;
 
     @PrePersist
     void onCreate() { if (createdAt == null) createdAt = Instant.now(); }

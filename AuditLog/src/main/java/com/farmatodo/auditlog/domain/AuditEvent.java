@@ -25,13 +25,13 @@ public class AuditEvent {
     private String service; // orders, payments, products, customers, tokenization
 
     @Column(nullable=false, length=80)
-    private String eventType; // e.g., PAYMENT.APPROVED, ORDER.CREATED
+    private String eventType; //PAYMENT.APPROVED, ORDER.CREATED
 
     @Column(length=80)
     private String orderId;
 
     @Column(length=80)
-    private String entityId; // opcional: productId, customerId, etc.
+    private String entityId; //productId, customerId, etc.
 
     @Column(nullable=false)
     private Instant createdAt;

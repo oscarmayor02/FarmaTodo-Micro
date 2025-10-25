@@ -26,7 +26,7 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
             "/ping", "/v3/api-docs", "/swagger-ui", "/swagger-ui/index.html"
     );
 
-    @Override// Permite excluir rutas
+    @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         // Obtengo el path del request
         String path = request.getRequestURI();

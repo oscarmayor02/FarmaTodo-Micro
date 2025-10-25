@@ -8,7 +8,7 @@ public final class CardBrandDetector {
 
     private CardBrandDetector() {}
 
-    public static String detect(String pan) {                      // Método estático de utilidad
+    public static String detect(String pan) {
         if (pan == null || pan.isEmpty()) return "UNKNOWN";        // Null safety básico
         if (pan.startsWith("4")) return "VISA";                    // Visa: 4
         if (pan.matches("5[1-5].*")) return "MASTERCARD";          // MasterCard: 51-55

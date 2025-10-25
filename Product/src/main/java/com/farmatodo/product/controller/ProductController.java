@@ -23,7 +23,9 @@ public class ProductController {
     private final ProductService service;
     private final SearchLogService searchLogService;
 
-    /** -------- CRUD -------- */
+    /**
+     * -------- CRUD --------
+     */
 
     // Crear producto
     @PostMapping("/products")
@@ -41,9 +43,6 @@ public class ProductController {
         return ResponseEntity.ok(service.update(id, req));
     }
 
-    // (Opcional) PATCH: si lo implementas en el service
-    // @PatchMapping("/products/{id}") ...
-
     // Eliminar
     @DeleteMapping("/products/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
@@ -51,7 +50,6 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
-    // Listar todos (para pruebas/admin)
     @GetMapping("/products")
     public ResponseEntity<List<ProductDTO>> list() {
         return ResponseEntity.ok(service.list());

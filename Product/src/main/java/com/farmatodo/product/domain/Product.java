@@ -13,7 +13,6 @@ public class Product {
 
     @Column(nullable=false) private String name;
 
-    // Precio en unidades menores (centavos) para evitar flotantes
     @Column(nullable=false) private Long price;
 
     @Column(nullable=false) private Integer stock;

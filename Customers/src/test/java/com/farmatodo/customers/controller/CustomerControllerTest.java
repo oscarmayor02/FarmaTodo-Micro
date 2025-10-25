@@ -22,8 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Tests del controlador usando @WebMvcTest y MockMvc.
- * NOTA: si tu ApiKeyAuthFilter protege /api/v1/**, puedes
- *       o bien desactivarlo en este slice, o simular el header.
+ * NOTA: si tu ApiKeyAuthFilter protege /api/v1/**,
  *       Aquí simulamos el header X-API-KEY en cada request.
  */
 @WebMvcTest(controllers = CustomerController.class)

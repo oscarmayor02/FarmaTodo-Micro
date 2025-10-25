@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
                 ? ex.getMostSpecificCause().getMessage() : ex.getMessage());
     }
 
-    // Validaciones de @Valid (campos requeridos, rangos, etc.)
+    // Validaciones de @Valid (campos requeridos, rangos)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest req) {
         String details = ex.getBindingResult()
@@ -41,13 +41,13 @@ public class GlobalExceptionHandler {
         return fe.getField() + ": " + (fe.getDefaultMessage() != null ? fe.getDefaultMessage() : "invalid");
     }
 
-    // Violaciones de restricción (únicos, etc.)
+    // Violaciones de restricción (únicos)
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex, HttpServletRequest req) {
         return build(HttpStatus.CONFLICT, "Data integrity violation", req, root(ex));
     }
 
-    // Excepciones de negocio pre-mapeadas a HTTP (si lanzas ErrorResponseException)
+    // Excepciones de negocio premapeadas a HTTP (si lanzas ErrorResponseException)
     @ExceptionHandler(ErrorResponseException.class)
     public ResponseEntity<ApiError> handleErrorResponse(ErrorResponseException ex, HttpServletRequest req) {
         HttpStatus status = (HttpStatus) ex.getStatusCode();
@@ -61,7 +61,6 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "Illegal state", req, root(ex));
     }
 
-    // Catch-all (último recurso)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGeneric(Exception ex, HttpServletRequest req) {
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", req, root(ex));
