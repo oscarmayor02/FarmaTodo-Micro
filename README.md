@@ -15,7 +15,7 @@ Incluye colecciones Postman, pruebas, y guías para despliegue local y en GCP.
 | cart-service          |   8087 | Carrito por cliente (agregar/listar/borrar ítems).                                                 |
 | audit-service         |   8088 | Logs centralizados (eventos con `txId`).                                                           |
 
-```mermaid
+
 Tokenization: http://34.135.158.232:8081/actuator/health
 
 Customers: http://34.135.158.232:8082/actuator/health
@@ -33,7 +33,7 @@ Cart: http://34.135.158.232:8087/actuator/health
 Audit: http://34.135.158.232:8088/actuator/health
 
 Todas las APIs requieren X-API-KEY (excepto /ping/swagger/health según whitelist).
-```
+
 ## Arquitectura (visión general)
 ```mermaid
 flowchart LR
@@ -84,31 +84,29 @@ MDC/Tracing: header X-TX-ID (si no viene, se genera).
 Usa .env (local/compose) y variables en GCP (VM/Container/Cloud Run):
 
 # Postgres
-```mermaid
+
 PG_USER=postgres
 PG_PASSWORD=root
-```
+
 # API Key única para simplificar (puedes separarlas)
 API_KEY=dev-secret
 
 # Tokenization
-```mermaid
+
 CRYPTO_KEY_HEX=00112233445566778899AABBCCDDEEFF00112233445566778899AABBCCDDEEFF
 TOKEN_HMAC_SECRET=change-me
 TOKEN_REJECTION_PROB=0.15
-```
-```mermaid
+
 # Payments
 PAYMENT_REJECTION_PROB=0.20
 PAYMENT_MAX_RETRIES=2
 PAYMENT_BACKOFF_MS=200
-```
-```mermaid
+
 # Notifications (Gmail)
-MAIL_FROM=tu_gmail@gmail.com
-MAIL_USERNAME=tu_gmail@gmail.com
-MAIL_PASSWORD=app_password_16_chars
-```
+##### MAIL_FROM=tu_gmail@gmail.com
+##### MAIL_USERNAME=tu_gmail@gmail.com
+##### MAIL_PASSWORD=app_password_16_chars
+
 
 Cada micro también soporta overrides (*_BASE_URL) para apuntar a otros servicios por DNS del compose (ej: http://products-service:8084).
 
@@ -118,24 +116,19 @@ docker-compose.yml (incluye Postgres por servicio y todos los micros).
 Comandos:
 
 # 0) (opcional) build jars locales si NO usas Docker multi-stage en todos
-```mermaid
-mvn -DskipTests package -pl tokenization-service,customers-service,products-service,orders-service,payments-service,cart-service,notifications-service,audit-service -am
-```
+##### mvn -DskipTests package -pl tokenization-service,customers-service,products-service,orders-service,payments-service,cart-service,notifications-service,audit-service -am
+
 # 1) Construir imágenes
-```mermaid 
-docker compose build
-```
+##### docker compose build
 
 # 2) Levantar todo
-```mermaid
-docker compose up -d
-```
+
+##### docker compose up -d
 
 # 3) Ver estado / logs
-```mermaid
-docker compose ps
-docker compose logs -f payments-service
-```
+##### docker compose ps
+##### docker compose logs -f payments-service
+
 
 Importante: dentro de contenedores no uses localhost para otros micros/DB. Usa el nombre del servicio (p. ej. products-service:8084).
 
@@ -153,151 +146,149 @@ cd <micro> && mvn spring-boot:run
 Ajusta application.yml con JDBC locales (ya los tienes) y URLs remotas entre servicios (localhost:puerto).
 
 ## Despliegue en GCP
-```mermaid
-Opción A — VM (Compute Engine)
 
-Crea VM (Ubuntu/Debian), instala Docker + Docker Compose.
+### Opción A — VM (Compute Engine)
+##### Crea VM (Ubuntu/Debian), instala Docker + Docker Compose.
+##### Lleva el repo a la VM (git clone).
 
-Lleva el repo a la VM (git clone).
+##### Abre firewall para puertos 8081–8088 (o configura un reverse proxy/ingress).
 
-Abre firewall para puertos 8081–8088 (o configura un reverse proxy/ingress).
+##### Configura .env (API_KEY, SMTP, etc.).
 
-Configura .env (API_KEY, SMTP, etc.).
+##### docker compose up -d.
 
-docker compose up -d.
+### Opción B — Cloud Run (1 micro = 1 servicio)
 
-Opción B — Cloud Run (1 micro = 1 servicio)
+##### Para cada micro: gcloud builds submit --tag gcr.io/<PROYECTO>/<imagen>
 
-Para cada micro: gcloud builds submit --tag gcr.io/<PROYECTO>/<imagen>
-
-gcloud run deploy --image gcr.io/... --allow-unauthenticated --set-env-vars ...
+##### gcloud run deploy --image gcr.io/... --allow-unauthenticated --set-env-vars ...
 
 Para Postgres usa Cloud SQL y VPC Connector o PG públicas, y ajusta SPRING_DATASOURCE_URL.
-```
+
 ## Colecciones Postman
-```mermaid
-Incluye las colecciones (sugerencia de nombres; ya las fuiste usando):
 
-Tokenization.postman_collection.json
+##### Incluye las colecciones (sugerencia de nombres; ya las fuiste usando):
 
-Customers.postman_collection.json
+##### Tokenization.postman_collection.json
 
-Products.postman_collection.json
+##### Customers.postman_collection.json
 
-Cart.postman_collection.json
+##### Products.postman_collection.json
 
-Payments.postman_collection.json
+##### Cart.postman_collection.json
 
-Orders.postman_collection.json
+##### Payments.postman_collection.json
 
-Notifications.postman_collection.json
+##### Orders.postman_collection.json
 
-Audit.postman_collection.json (health + consulta básica)
+##### Notifications.postman_collection.json
 
-Variables Postman recomendadas
-{{api_key}}=dev-secret
-{{tokenization_base}}=http://localhost:8081
-{{customers_base}}=http://localhost:8082
-{{payments_base}}=http://localhost:8083
-{{products_base}}=http://localhost:8084
-{{orders_base}}=http://localhost:8085
-{{notifications_base}}=http://localhost:8086
-{{cart_base}}=http://localhost:8087
-{{audit_base}}=http://localhost:8088
+##### Audit.postman_collection.json (health + consulta básica)
 
-```
+#### Variables Postman recomendadas
+##### {{api_key}}=dev-secret
+##### {{tokenization_base}}=http://localhost:8081
+##### {{customers_base}}=http://localhost:8082
+##### {{payments_base}}=http://localhost:8083
+##### {{products_base}}=http://localhost:8084
+##### {{orders_base}}=http://localhost:8085
+##### {{notifications_base}}=http://localhost:8086
+##### {{cart_base}}=http://localhost:8087
+##### {{audit_base}}=http://localhost:8088
+
+
 En producción, reemplazamos localhost por la IP 34.135.158.232.
  
 ## Endpoints (resumen ultra-rápido)
-```mermaid
-Tokenization (8081)
 
-GET /ping → pong
+##### Tokenization (8081)
 
-POST /api/v1/tokenize
-Body:
+##### GET /ping → pong
 
-{ "pan":"4111111111111111","cvv":"123","expMonth":12,"expYear":2030,"name":"John Doe" }
+##### POST /api/v1/tokenize
+##### Body:
 
-
-200: {"token":"<id>","last4":"1111","brand":"VISA","status":"ISSUED"}
-422/402 si rechazo probabilístico.
-
-Customers (8082)
-
-POST /api/v1/customers
-
-GET /api/v1/customers/{id}
-
-(PUT/PATCH/DELETE/list) según implementado.
-
-Products (8084)
-
-POST /api/v1/products (crear)
-
-GET /api/v1/products/{id}
-
-GET /api/v1/products (listar)
-
-GET /api/v1/products/search?q=... (solo stock ≥ MIN_STOCK_VISIBLE)
-
-POST /api/v1/products/{id}/decrement?qty={n}
-
-Cart (8087)
-
-POST /api/v1/carts/{customerId}/items → { "productId":1,"qty":2 }
-
-GET /api/v1/carts/{customerId}
-
-DELETE /api/v1/carts/{customerId}/items/{productId}
-
-Payments (8083)
-
-POST /api/v1/payments/charge
-Body con card:
-
-{
-"orderId":"ORD-CARD-{{RANDOM}}","amount":20000,"currency":"COP",
-"card":{"pan":"4111111111111111","cvv":"123","expMonth":12,"expYear":2030,"name":"John Doe"},
-"customerEmail":"tu@mail.com"
-}
+##### { "pan":"4111111111111111","cvv":"123","expMonth":12,"expYear":2030,"name":"John Doe" }
 
 
-Body con token:
+##### 200: {"token":"<id>","last4":"1111","brand":"VISA","status":"ISSUED"}
+##### 422/402 si rechazo probabilístico.
 
-{ "orderId":"ORD-TOKEN-{{RANDOM}}", "amount":15000, "currency":"COP", "token":"tok-demo", "customerEmail":"tu@mail.com" }
+##### Customers (8082)
+
+##### POST /api/v1/customers
+
+##### GET /api/v1/customers/{id}
+
+##### (PUT/PATCH/DELETE/list) según implementado.
+
+##### Products (8084)
+
+##### POST /api/v1/products (crear)
+
+##### GET /api/v1/products/{id}
+
+##### GET /api/v1/products (listar)
+
+##### GET /api/v1/products/search?q=... (solo stock ≥ MIN_STOCK_VISIBLE)
+
+##### POST /api/v1/products/{id}/decrement?qty={n}
+
+##### Cart (8087)
+
+##### POST /api/v1/carts/{customerId}/items → { "productId":1,"qty":2 }
+
+##### GET /api/v1/carts/{customerId}
+
+##### DELETE /api/v1/carts/{customerId}/items/{productId}
+
+##### Payments (8083)
+
+##### POST /api/v1/payments/charge
+##### Body con card:
+
+##### {
+##### "orderId":"ORD-CARD-{{RANDOM}}","amount":20000,"currency":"COP",
+##### "card":{"pan":"4111111111111111","cvv":"123","expMonth":12,"expYear":2030,"name":"John Doe"},
+##### "customerEmail":"tu@mail.com"
+##### }
 
 
-200 aprobado → notifica + audita
-422 rechazado después de reintentos → notifica + audita
+##### Body con token:
 
-Orders (8085)
-
-POST /api/v1/orders
-Body:
-
-{
-"customerId":1, "address":"Calle 123 #45-67, Bogotá",
-"tokenCard":"<token>",        // o "card": { ... } si no tienes token
-"items":[{"productId":1,"qty":2}],
-"customerEmail":"tu@mail.com"
-}
+##### { "orderId":"ORD-TOKEN-{{RANDOM}}", "amount":15000, "currency":"COP", "token":"tok-demo", "customerEmail":"tu@mail.com" }
 
 
-→ Valida customer, carga productos, calcula total, llama a payments, si aprueba descuenta stock en products, marca PAID, audita.
+##### 200 aprobado → notifica + audita
+##### 422 rechazado después de reintentos → notifica + audita
 
-GET /api/v1/orders/{id}
+##### Orders (8085)
 
-Notifications (8086)
+##### POST /api/v1/orders
+##### Body:
 
-POST /api/v1/notify/payment (interno, lo llama payments)
+##### {
+##### "customerId":1, "address":"Calle 123 #45-67, Bogotá",
+##### "tokenCard":"<token>",        // o "card": { ... } si no tienes token
+##### "items":[{"productId":1,"qty":2}],
+##### "customerEmail":"tu@mail.com"
+##### }
 
-Audit (8088)
 
-POST /api/v1/logs (interno, lo llaman payments y orders)
+##### → Valida customer, carga productos, calcula total, llama a payments, si aprueba descuenta stock en products, marca PAID, audita.
 
-GET /actuator/health
-```
+##### GET /api/v1/orders/{id}
+
+##### Notifications (8086)
+
+##### POST /api/v1/notify/payment (interno, lo llama payments)
+
+##### Audit (8088)
+
+##### POST /api/v1/logs (interno, lo llaman payments y orders)
+
+##### GET /actuator/health
+
 ##  Pruebas y cobertura
 
 Ejecutar pruebas:
